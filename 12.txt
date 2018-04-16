@@ -1,0 +1,274 @@
+
+#include<fstream.h>
+#include<conio.h>
+#include<stdio.h>
+#include<math.h>
+
+
+class decode
+{
+ int min[4][4],inp[4][4],a[3][3],mes[4][4],c[4][4];
+ char message[36];
+ int det,determinent4;
+ int adj[4][4],adj4[4][4];
+
+ public:
+int determinent(int a[3][3])
+{
+   det=(a[0][0]*(a[1][1]*a[2][2]-a[1][2]*a[2][1]))-(a[0][1]*(a[1][0]*a[2][2]-a[1][2]*a[2][0]))+(a[0][2]* (a[1][0]*a[2][1]-a[1][1]*a[2][0]) );
+  return det;
+
+ }
+void input()
+{  cout<<"Enter code matrix\n";
+  for(int i=0;i<4;i++)
+   {
+   for(int j=0;j<4;j++)
+      cin>>inp[i][j];
+   }
+}
+
+void inp2()
+{
+  cout<<"Enter the coded matrix\n";
+  for(int i=0;i<4;i++)
+   {
+    for(int j=0;j<4;j++)
+      cin>>mes[i][j];
+    }
+}
+
+
+void cof()
+{
+ for(int i=0;i<4;i++)
+  {
+    for(int j=0;j<4;j++)
+     {
+       adj4[i][j]= pow(-1,i+j) * adj4[i][j];
+     }
+
+   }
+}
+
+void adjoint()
+{
+ for(int i=0;i<4;i++)
+  {
+   for(int j=0;j<4;j++)
+    {
+      adj[i][j]=adj4[j][i];
+
+    }
+   }
+}
+
+
+void inverse()
+{
+ for(int i=0;i<4;i++)
+  {
+    for(int j=0;j<4;j++)
+     { c[i][j]=(c[i][j])/determinent4;}
+   }
+}
+
+void convert()
+{
+ int ctr=0;
+ for(int i=0;i<4;i++)
+  {
+    for(int j=0;j<4;j++)
+     { message[ctr]=c[i][j];ctr++;   }
+
+
+
+   }
+}
+
+
+ void process()
+{
+  for(int i=0;i<4;i++)
+   {
+    for(int j=0;j<4;j++)
+     {
+      c[i][j]=0;
+      for(int op=0;op<4;op++)
+	c[i][j]+=(mes[i][op]*adj[op][j]);
+     }
+    }
+  }
+
+  void display()
+  {  clrscr();
+    cout<<"\n\t\t\tThe Message is\n\n\t\t\t";
+   for(int i=0;i<16;i++)
+    { cout<<message[i];
+    }
+  }
+  int detconvert(int k,int l)
+  {
+     int m=0,n=0;
+      for(int i=0;i<4;i++)
+      {
+	 for(int j=0;j<4;j++)
+	  {
+	    if(i!=k && j!=l)
+	     {
+	      a[m][n]=inp[i][j];
+	      n++;
+	      if(n==3)
+	       { n=0;m++; }
+	     }
+	  }
+       }
+   return determinent(a);
+  }
+  void det4()
+  {
+    determinent4=inp[0][0]*detconvert(0,0)-inp[0][1]*detconvert(0,1)+inp[0][2]*detconvert(0,2)-inp[0][3]*detconvert(0,3);
+
+  }
+  void minors()
+  {
+   for(int i=0;i<4;i++)
+    {
+      for(int j=0;j<4;j++)
+       {
+	 adj4[i][j]=detconvert(i,j);
+       }
+     }
+   }
+
+
+ };
+
+ class encode
+ {
+   char message[36];
+   int elements,arr[4][4],code[4][4],c[4][4],i,j;
+
+  public:
+
+  void input()
+  {   int ctr=0;
+  cout<<"Enter how many elements(max:16)\n";
+  cin>>elements;
+  cout<<"Enter message\n";
+  cin.ignore();
+  cin.getline(message,elements+1); cin.ignore();
+
+     for(i=0;i<4;i++)
+       {
+	for(j=0;j<4;j++)
+	 {
+	   if( ctr<elements)
+	  {  arr[i][j]=message[ctr];
+	     ++ctr;
+	   }
+	   else
+	      arr[i][j]=32;
+
+	  }
+
+	}
+  }
+
+  void inputcode()
+  {
+
+    cout<<"\nInput code matrix\n";
+
+      for(i=0;i<4;i++)
+       {
+	for(j=0;j<4;j++)
+	 {
+	  cin>>code[i][j];
+	  }
+
+	}
+  }
+  void process()
+  {
+    for(i=0;i<4;i++)
+    {
+      for(j=0;j<4;j++)
+      {
+	c[i][j]=0;
+       for(int op=0;op<4;op++)
+	 c[i][j]+=(arr[i][op]*code[op][j]);
+       }
+     }
+      cout<<"\n";
+      ofstream outfile;
+     outfile.open("matrixmessage.txt",ios::out);
+      for(i=0;i<4;i++)
+       {
+	for(int j=0;j<4;j++)
+	 {
+	   cout<<c[i][j]<<" ";
+	   outfile<<c[i][j]<<" ";
+	  }cout<<"\n";
+	   outfile<<"\n";
+	}
+	outfile.close();
+
+ cout<<"The coded matrix and code matrix are saved in text file //matrix.txt//";
+   }
+
+ };
+
+
+
+
+void decodeprocess()
+{
+  clrscr();
+  decode obj;
+  obj.input();
+  obj.inp2();
+  obj.det4();
+  obj.minors();
+  obj.cof();
+
+  obj.adjoint();
+  obj.process();
+  obj.inverse();
+  obj.convert();
+  obj.display();
+ getch();
+
+}
+void encodeprocess()
+{
+ clrscr();
+ encode obj1;
+ obj1.input();
+ obj1.inputcode();
+ obj1.process();
+ getch();
+ }
+
+ void main()
+ {
+  clrscr();
+  int choice;
+  cout<<"\n\t\t\t******* cryptography *******";
+  cout<<"\n\n\n\n\n\n\n\n\t\t\t    Enter choice\n";
+  cout<<"\t\t\t    1-Encode\n";
+  cout<<"\t\t\t    2-Decode\n\n\t";
+  cin>>choice;
+  if(choice==1)
+   { encodeprocess();
+     cout<<"\n\n\n\t\t\t\tThank you!!"; }
+  else if(choice==2)
+   { decodeprocess();
+     cout<<"\n\n\n\t\t\t\tThank you!!"; }
+  else
+   cout<<"\n\nError! try again";
+
+  getch();
+
+  }
+
